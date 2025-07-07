@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Fetch Categories</title>
+</head>
+<body>
+  <h2>Categories List</h2>
+  <ul id="categoriesList">Loading...</ul>
+
+  <script>
+    const apiUrl = 'http://localhost:5000/api/categories';
+
+    async function fetchCategories() {
+      try {
+        const res = await fetch(apiUrl);
+        if (!res.ok) throw new Error('API error: ' + res.status);
+        const categories = await res.json();
+
+        const list = document.getElementById('categoriesList');
+        list.innerHTML = '';
+
+        if (categories.length === 0) {
+          list.innerHTML = '<li>No categories found</li>';
+          return;
+        }
+
+        categories.forEach(cat => {
+          const li = document.createElement('li');
+          li.textContent = cat.name + ' (ID: ' + cat._id + ')';
+          list.appendChild(li);
+        });
+      } catch (err) {
+        document.getElementById('categoriesList').innerHTML = 'Error: ' + err.message;
+      }
+    }
+
+    fetchCategories();
+  </script>
+</body>
+</html>
