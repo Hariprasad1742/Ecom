@@ -129,6 +129,63 @@ app.delete('/api/products/:id', async (req, res) => {
   }
 });
 
+
+// Get all variants for a product
+app.get('/api/products/:productId/variants', async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.productId);
+    if (!product) return res.status(404).json({ error: 'Product not found' });
+    res.json(product.variants);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Add a new variant to a product
+app.post('/api/products/:productId/variants', async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.productId);
+    if (!product) return res.status(404).json({ error: 'Product not found' });
+
+    product.variants.push(req.body);  // req.body: { name: "Color", value: "Red" }
+    await product.save();
+    res.status(201).json(product.variants);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// Update a variant by ID
+app.put('/api/variants/:variantId', async (req, res) => {
+  try {
+    const product = await Product.findOne({ 'variants._id': req.params.variantId });
+    if (!product) return res.status(404).json({ error: 'Variant not found' });
+
+    const variant = product.variants.id(req.params.variantId);
+    variant.set(req.body);  // e.g., { name: "Color", value: "Blue" }
+    await product.save();
+
+    res.json(variant);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// Delete a variant
+app.delete('/api/variants/:variantId', async (req, res) => {
+  try {
+    const product = await Product.findOne({ 'variants._id': req.params.variantId });
+    if (!product) return res.status(404).json({ error: 'Variant not found' });
+
+    product.variants.id(req.params.variantId).remove();
+    await product.save();
+
+    res.json({ message: 'Variant deleted' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ===== SERVER START =====
 const PORT = 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
