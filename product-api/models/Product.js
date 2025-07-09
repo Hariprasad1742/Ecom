@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const VariantSchema = new mongoose.Schema({
   name: String,
-  values: [String]   // Array of strings
+  values: [String]   
 });
 
 const ProductSchema = new mongoose.Schema({
@@ -12,10 +12,14 @@ const ProductSchema = new mongoose.Schema({
     ref: 'SubCategory',
     required: true
   },
+  brand: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Brand' 
+  },
   price: { type: Number, required: true },
   description: String,
   inStock: { type: Boolean, default: true },
-  variants: [VariantSchema],   // Variant with name + values array
+  variants: [VariantSchema],
   createdAt: { type: Date, default: Date.now }
 });
 
