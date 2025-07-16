@@ -3,18 +3,31 @@ const router = express.Router();
 const SubCategory = require('../models/SubCategory');
 const Brand = require('../models/Brand');
 
-// Create subcategory
-router.post('/', async (req, res) => {
+// ✅ Create a subcategory (requires category ID in body)
+router.post('/categories/:categoryId/subcategories', async (req, res) => {
   try {
-    const subcategory = new SubCategory(req.body);
+    const subcategory = new SubCategory({
+      ...req.body,
+      category: req.params.categoryId,
+    });
     const saved = await subcategory.save();
-    res.json(saved);
+    res.status(201).json(saved);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 });
 
-// Get a single subcategory by ID
+// ✅ Get all subcategories with populated category
+router.get('/', async (req, res) => {
+  try {
+    const subcategories = await SubCategory.find().populate('category');
+    res.json(subcategories);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ✅ Get a single subcategory by ID with populated category
 router.get('/:id', async (req, res) => {
   try {
     const subcategory = await SubCategory.findById(req.params.id).populate('category');
@@ -25,18 +38,29 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-
-// Get all subcategories with category 
-router.get('/', async (req, res) => {
+// ✅ Update subcategory
+router.put('/:id', async (req, res) => {
   try {
-    const subcategories = await SubCategory.find().populate('category');
-    res.json(subcategories);
+    const updated = await SubCategory.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!updated) return res.status(404).json({ error: 'SubCategory not found' });
+    res.json(updated);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// ✅ Delete subcategory
+router.delete('/:id', async (req, res) => {
+  try {
+    const deleted = await SubCategory.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ error: 'SubCategory not found' });
+    res.json({ message: 'SubCategory deleted' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// 🔥 Create brand under a subcategory
+// 🔥 Nested Brand Creation under a SubCategory
 router.post('/:subCategoryId/brands', async (req, res) => {
   try {
     const brand = new Brand({
@@ -44,13 +68,13 @@ router.post('/:subCategoryId/brands', async (req, res) => {
       subCategory: req.params.subCategoryId,
     });
     const saved = await brand.save();
-    res.json(saved);
+    res.status(201).json(saved);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 });
 
-// 🔍 Get brands under a subcategory
+// 🔍 Get brands under a specific SubCategory
 router.get('/:subCategoryId/brands', async (req, res) => {
   try {
     const brands = await Brand.find({ subCategory: req.params.subCategoryId });

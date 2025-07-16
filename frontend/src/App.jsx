@@ -1,30 +1,28 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
-import AddCategory from './components/AddCategory';
-import AddSubCategory from './components/AddSubCategory';
-import AddBrand from './components/AddBrand';
-import AddProduct from './components/AddProduct';
+// src/App.jsx
 
-function App() {
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import Categories from './pages/Categories';
+import SubCategories from './pages/SubCategories';
+import Brands from './pages/Brands';
+
+export default function App() {
   return (
-    <BrowserRouter>
-      <div>
-        <h1>CommerceDB Admin</h1>
-        <nav>
-          <Link to="/">Category</Link> | 
-          <Link to="/subcategory">SubCategory</Link> | 
-          <Link to="/brand">Brand</Link> | 
-          <Link to="/product">Product</Link>
+    <Router>
+      <div style={{ padding: '1rem' }}>
+        <h1>Admin Panel</h1>
+
+        <nav style={{ marginBottom: '1rem' }}>
+          <Link to="/categories" style={{ marginRight: '1rem' }}>Categories</Link>
+          <Link to="/subcategories">SubCategories</Link>
+          <Link to="/brands">Brands</Link>
         </nav>
+
         <Routes>
-          <Route path="/" element={<AddCategory />} />
-          <Route path="/subcategory" element={<AddSubCategory />} />
-          <Route path="/brand" element={<AddBrand />} />
-          <Route path="/product" element={<AddProduct />} />
+          <Route path="/categories" element={<Categories />} />
+          <Route path="/subcategories" element={<SubCategories />} />
+          <Route path="/brands" element={<Brands />} />
         </Routes>
       </div>
-    </BrowserRouter>
+    </Router>
   );
 }
-
-export default App;

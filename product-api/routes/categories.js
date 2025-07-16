@@ -3,12 +3,12 @@ const router = express.Router();
 const Category = require('../models/Category');
 const SubCategory = require('../models/SubCategory');
 
-// Create category
+// Create a category
 router.post('/', async (req, res) => {
   try {
     const category = new Category(req.body);
     const saved = await category.save();
-    res.json(saved);
+    res.status(201).json(saved);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -24,7 +24,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Get a single category by ID
+// Get single category by ID
 router.get('/:id', async (req, res) => {
   try {
     const category = await Category.findById(req.params.id);
@@ -35,8 +35,29 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// Update category
+router.put('/:id', async (req, res) => {
+  try {
+    const updated = await Category.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!updated) return res.status(404).json({ error: 'Category not found' });
+    res.json(updated);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
 
-// 🔥 Get subcategories under a category
+// Delete category
+router.delete('/:id', async (req, res) => {
+  try {
+    const deleted = await Category.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ error: 'Category not found' });
+    res.json({ message: 'Category deleted' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get subcategories under a category
 router.get('/:categoryId/subcategories', async (req, res) => {
   try {
     const subcategories = await SubCategory.find({ category: req.params.categoryId });
