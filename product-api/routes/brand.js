@@ -16,7 +16,7 @@ router.post('/', async (req, res) => {
 // GET /api/brands/                      → Get all brands
 router.get('/', async (req, res) => {
   try {
-    const brands = await Brand.find().populate('subCategory');
+    const brands = await Brand.find();
     res.json(brands);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -26,7 +26,7 @@ router.get('/', async (req, res) => {
 // GET /api/brands/:id                   → Get single brand by ID
 router.get('/:id', async (req, res) => {
   try {
-    const brand = await Brand.findById(req.params.id).populate('subCategory');
+    const brand = await Brand.findById(req.params.id);
     if (!brand) return res.status(404).json({ error: 'Brand not found' });
     res.json(brand);
   } catch (err) {
@@ -56,28 +56,6 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// POST /api/brands/subcategories/:subCategoryId → Create brand under a subcategory
-router.post('/subcategories/:subCategoryId', async (req, res) => {
-  try {
-    const brand = new Brand({
-      ...req.body,
-      subCategory: req.params.subCategoryId
-    });
-    const saved = await brand.save();
-    res.status(201).json(saved);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
 
-// GET /api/brands/subcategories/:subCategoryId → Get all brands in a subcategory
-router.get('/subcategories/:subCategoryId', async (req, res) => {
-  try {
-    const brands = await Brand.find({ subCategory: req.params.subCategoryId }).populate('subCategory');
-    res.json(brands);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
 
 module.exports = router;

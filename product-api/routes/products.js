@@ -7,7 +7,10 @@ router.post('/', async (req, res) => {
   try {
     const product = new Product(req.body);
     const saved = await product.save();
-    res.status(201).json(saved);
+    const populated = await Product.findById(saved._id)
+      .populate('brand')
+      .populate('subCategory');
+    res.status(201).json(populated);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -41,7 +44,9 @@ router.get('/:id', async (req, res) => {
 // Update product
 router.put('/:id', async (req, res) => {
   try {
-    const updated = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updated = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true })
+      .populate('brand')
+      .populate('subCategory');
     if (!updated) return res.status(404).json({ error: 'Not found' });
     res.json(updated);
   } catch (err) {

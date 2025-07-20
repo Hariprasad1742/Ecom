@@ -3,7 +3,19 @@ const router = express.Router();
 const SubCategory = require('../models/SubCategory');
 const Brand = require('../models/Brand');
 
-// ✅ Create a subcategory (requires category ID in body)
+// ✅ Create a subcategory (simple route for admin dashboard)
+router.post('/', async (req, res) => {
+  try {
+    const subcategory = new SubCategory(req.body);
+    const saved = await subcategory.save();
+    const populated = await SubCategory.findById(saved._id).populate('category');
+    res.status(201).json(populated);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// ✅ Create a subcategory (nested route - keeping for backward compatibility)
 router.post('/categories/:categoryId/subcategories', async (req, res) => {
   try {
     const subcategory = new SubCategory({
@@ -11,7 +23,8 @@ router.post('/categories/:categoryId/subcategories', async (req, res) => {
       category: req.params.categoryId,
     });
     const saved = await subcategory.save();
-    res.status(201).json(saved);
+    const populated = await SubCategory.findById(saved._id).populate('category');
+    res.status(201).json(populated);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
