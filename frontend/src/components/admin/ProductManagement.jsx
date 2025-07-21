@@ -7,16 +7,18 @@ const ProductManagement = () => {
   const [subCategories, setSubCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   const [showForm, setShowForm] = useState(false);
+  const [showVariantsModal, setShowVariantsModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [editingVariantsProduct, setEditingVariantsProduct] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     subCategory: '',
     brand: '',
     price: '',
     description: '',
-    inStock: true,
-    variants: []
+    inStock: true
   });
+  const [variantsData, setVariantsData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -91,10 +93,33 @@ const ProductManagement = () => {
       brand: product.brand?._id || product.brand || '',
       price: product.price.toString(),
       description: product.description || '',
-      inStock: product.inStock,
-      variants: product.variants || []
+      inStock: product.inStock
     });
     setShowForm(true);
+  };
+
+  const handleEditVariants = (product) => {
+    setEditingVariantsProduct(product);
+    setVariantsData(product.variants || []);
+    setShowVariantsModal(true);
+  };
+
+  const handleSaveVariants = async () => {
+    try {
+      setLoading(true);
+      const productData = {
+        ...editingVariantsProduct,
+        variants: variantsData
+      };
+      await axios.put(`${API_BASE}/products/${editingVariantsProduct._id}`, productData);
+      await fetchProducts();
+      resetVariantsForm();
+    } catch (err) {
+      setError('Failed to save variants');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDelete = async (id) => {
@@ -119,11 +144,17 @@ const ProductManagement = () => {
       brand: '', 
       price: '', 
       description: '', 
-      inStock: true, 
-      variants: [] 
+      inStock: true
     });
     setEditingProduct(null);
     setShowForm(false);
+    setError('');
+  };
+
+  const resetVariantsForm = () => {
+    setVariantsData([]);
+    setEditingVariantsProduct(null);
+    setShowVariantsModal(false);
     setError('');
   };
 
@@ -136,62 +167,44 @@ const ProductManagement = () => {
   };
 
   const addVariant = () => {
-    setFormData(prev => ({
-      ...prev,
-      variants: [...prev.variants, { name: '', values: [''] }]
-    }));
+    setVariantsData(prev => [...prev, { name: '', values: [''] }]);
   };
 
   const removeVariant = (index) => {
-    setFormData(prev => ({
-      ...prev,
-      variants: prev.variants.filter((_, i) => i !== index)
-    }));
+    setVariantsData(prev => prev.filter((_, i) => i !== index));
   };
 
   const updateVariant = (index, field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      variants: prev.variants.map((variant, i) => 
-        i === index ? { ...variant, [field]: value } : variant
-      )
-    }));
+    setVariantsData(prev => prev.map((variant, i) => 
+      i === index ? { ...variant, [field]: value } : variant
+    ));
   };
 
   const addVariantValue = (variantIndex) => {
-    setFormData(prev => ({
-      ...prev,
-      variants: prev.variants.map((variant, i) => 
-        i === variantIndex 
-          ? { ...variant, values: [...variant.values, ''] }
-          : variant
-      )
-    }));
+    setVariantsData(prev => prev.map((variant, i) => 
+      i === variantIndex 
+        ? { ...variant, values: [...variant.values, ''] }
+        : variant
+    ));
   };
 
   const removeVariantValue = (variantIndex, valueIndex) => {
-    setFormData(prev => ({
-      ...prev,
-      variants: prev.variants.map((variant, i) => 
-        i === variantIndex 
-          ? { ...variant, values: variant.values.filter((_, vi) => vi !== valueIndex) }
-          : variant
-      )
-    }));
+    setVariantsData(prev => prev.map((variant, i) => 
+      i === variantIndex 
+        ? { ...variant, values: variant.values.filter((_, vi) => vi !== valueIndex) }
+        : variant
+    ));
   };
 
   const updateVariantValue = (variantIndex, valueIndex, value) => {
-    setFormData(prev => ({
-      ...prev,
-      variants: prev.variants.map((variant, i) => 
-        i === variantIndex 
-          ? { 
-              ...variant, 
-              values: variant.values.map((val, vi) => vi === valueIndex ? value : val)
-            }
-          : variant
-      )
-    }));
+    setVariantsData(prev => prev.map((variant, i) => 
+      i === variantIndex 
+        ? { 
+            ...variant, 
+            values: variant.values.map((val, vi) => vi === valueIndex ? value : val)
+          }
+        : variant
+    ));
   };
 
   return (
@@ -305,6 +318,29 @@ const ProductManagement = () => {
                 </label>
               </div>
 
+
+
+              <div className="form-actions">
+                <button type="button" className="btn btn-secondary" onClick={resetForm}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary" disabled={loading}>
+                  {loading ? 'Saving...' : (editingProduct ? 'Update' : 'Create')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showVariantsModal && (
+        <div className="form-modal">
+          <div className="form-container large">
+            <div className="form-header">
+              <h3>Edit Variants - {editingVariantsProduct?.name}</h3>
+              <button className="close-btn" onClick={resetVariantsForm}>×</button>
+            </div>
+            <div style={{ padding: '30px' }}>
               <div className="variants-section">
                 <div className="variants-header">
                   <h4>Product Variants</h4>
@@ -312,7 +348,7 @@ const ProductManagement = () => {
                     + Add Variant
                   </button>
                 </div>
-                {formData.variants.map((variant, variantIndex) => (
+                {variantsData.map((variant, variantIndex) => (
                   <div key={variantIndex} className="variant-group">
                     <div className="variant-header">
                       <input
@@ -358,16 +394,16 @@ const ProductManagement = () => {
                   </div>
                 ))}
               </div>
-
+              
               <div className="form-actions">
-                <button type="button" className="btn btn-secondary" onClick={resetForm}>
+                <button type="button" className="btn btn-secondary" onClick={resetVariantsForm}>
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary" disabled={loading}>
-                  {loading ? 'Saving...' : (editingProduct ? 'Update' : 'Create')}
+                <button type="button" className="btn btn-primary" onClick={handleSaveVariants} disabled={loading}>
+                  {loading ? 'Saving...' : 'Save Variants'}
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}
@@ -411,6 +447,13 @@ const ProductManagement = () => {
                       onClick={() => handleEdit(product)}
                     >
                       Edit
+                    </button>
+                    <button 
+                      className="btn btn-sm btn-secondary"
+                      onClick={() => handleEditVariants(product)}
+                      title="Edit product variants"
+                    >
+                      Variants
                     </button>
                     <button 
                       className="btn btn-sm btn-delete"
