@@ -24,6 +24,8 @@ const ProductManagement = () => {
   const [error, setError] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
+  const [addingValueFor, setAddingValueFor] = useState(null); // Track which variant is getting a new value
+  const [newValueInput, setNewValueInput] = useState(''); // Input for new value
 
   const API_BASE = 'http://localhost:3000/api';
 
@@ -219,9 +221,53 @@ const ProductManagement = () => {
     }
   };
 
-  // Helper function to convert array to comma-separated string for display
-  const getVariantValuesString = (values) => {
-    return Array.isArray(values) ? values.join(', ') : '';
+  const handleAddValueClick = (variantIndex) => {
+    setAddingValueFor(variantIndex);
+    setNewValueInput('');
+  };
+
+  const handleAddValue = (variantIndex) => {
+    if (!newValueInput.trim()) return;
+    
+    setVariantsData(prev => {
+      const newVariants = [...prev];
+      const values = [...(newVariants[variantIndex].values || [])];
+      
+      // Add the new value if it doesn't already exist
+      if (!values.includes(newValueInput.trim())) {
+        values.push(newValueInput.trim());
+        newVariants[variantIndex] = {
+          ...newVariants[variantIndex],
+          values
+        };
+      }
+      
+      return newVariants;
+    });
+    
+    setNewValueInput('');
+    setAddingValueFor(null);
+  };
+
+  const removeVariantValue = (variantIndex, valueToRemove) => {
+    setVariantsData(prev => {
+      const newVariants = [...prev];
+      newVariants[variantIndex] = {
+        ...newVariants[variantIndex],
+        values: newVariants[variantIndex].values.filter(v => v !== valueToRemove)
+      };
+      return newVariants;
+    });
+  };
+
+  const handleKeyDown = (e, variantIndex) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddValue(variantIndex);
+    } else if (e.key === 'Escape') {
+      setAddingValueFor(null);
+      setNewValueInput('');
+    }
   };
 
   // Pagination logic
@@ -399,16 +445,46 @@ const ProductManagement = () => {
                       </button>
                     </div>
                     <div className="variant-values">
-                      <label htmlFor={`variant-values-${variantIndex}`}>
-                        Values :
-                      </label>
-                      <textarea
-                        id={`variant-values-${variantIndex}`}
-                        placeholder="Enter values separated by commas (e.g., Red, Blue, Green, Yellow)"
-                        value={getVariantValuesString(variant.values)}
-                        onChange={(e) => updateVariant(variantIndex, 'values', e.target.value)}
-                        rows="3"
-                      />
+                      {variant.values && variant.values.map((value, valueIndex) => (
+                        <span key={valueIndex} className="variant-tag">
+                          {value}
+                          <button 
+                            type="button" 
+                            className="variant-tag-remove"
+                            onClick={() => removeVariantValue(variantIndex, value)}
+                            title="Remove value"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                      
+                      {addingValueFor === variantIndex ? (
+                        <div className="add-value-input">
+                          <input
+                            type="text"
+                            value={newValueInput}
+                            onChange={(e) => setNewValueInput(e.target.value)}
+                            onKeyDown={(e) => handleKeyDown(e, variantIndex)}
+                            placeholder="Enter value and press Enter"
+                            autoFocus
+                          />
+                          <button 
+                            type="button"
+                            onClick={() => handleAddValue(variantIndex)}
+                          >
+                            Add
+                          </button>
+                        </div>
+                      ) : (
+                        <button 
+                          type="button"
+                          className="add-value-btn"
+                          onClick={() => handleAddValueClick(variantIndex)}
+                        >
+                          + Add Value
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}

@@ -353,40 +353,86 @@ form {
 }
 
 .variant-values {
-  margin-top: 10px;
+  margin-top: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
 }
 
-.variant-values label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 500;
+.variant-tag {
+  background: #e9ecef;
   color: #495057;
+  border-radius: 16px;
+  padding: 4px 12px;
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.variant-tag-remove {
+  background: none;
+  border: none;
+  color: #6c757d;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0 0 0 4px;
+  display: flex;
+  align-items: center;
+}
+
+.variant-tag-remove:hover {
+  color: #dc3545;
+}
+
+.add-value-btn {
+  background: #e9ecef;
+  color: #6c757d;
+  border: 1px dashed #adb5bd;
+  border-radius: 16px;
+  padding: 4px 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s;
+}
+
+.add-value-btn:hover {
+  background: #dee2e6;
+  border-color: #6c757d;
+}
+
+.add-value-input {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  width: 100%;
+}
+
+.add-value-input input {
+  flex: 1;
+  padding: 6px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
   font-size: 0.9rem;
 }
 
-.variant-values textarea {
-  width: 100%;
-  background: white !important;
-  color: #212529 !important;
-  border: 1px solid #ced4da;
-  border-radius: 6px;
-  padding: 12px;
-  font-size: 0.95rem;
-  font-family: inherit;
-  resize: vertical;
-  min-height: 80px;
-  transition: border-color 0.3s ease;
+.add-value-input button {
+  padding: 6px 12px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
 }
 
-.variant-values textarea:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-}
-
-.variant-values textarea::placeholder {
-  color: #6c757d;
-  font-style: italic;
+.add-value-input button:hover {
+  background: #218838;
 }
 
 .variant-remove-btn {
