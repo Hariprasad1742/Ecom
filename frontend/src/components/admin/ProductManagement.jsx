@@ -490,23 +490,25 @@ const ProductManagement = () => {
                   <td>{new Date(product.createdAt).toLocaleDateString()}</td>
                   <td className="actions">
                     <button 
-                      className="btn btn-sm btn-edit"
+                      className="btn btn-icon btn-edit"
                       onClick={() => handleEdit(product)}
+                      title="Edit Product"
                     >
-                      Edit
+                      <img src="https://e7.pngegg.com/pngimages/461/1024/png-clipart-computer-icons-editing-edit-icon-cdr-angle-thumbnail.png" alt="Edit" />
                     </button>
                     <button 
-                      className="btn btn-sm btn-secondary"
+                      className="btn btn-icon btn-variants"
                       onClick={() => handleEditVariants(product)}
-                      title="Edit product variants"
+                      title="Edit Product Variants"
                     >
-                      Variants
+                      ⚙️
                     </button>
                     <button 
-                      className="btn btn-sm btn-delete"
+                      className="btn btn-icon btn-delete"
                       onClick={() => handleDelete(product._id)}
+                      title="Delete Product"
                     >
-                      Delete
+                      <img src="https://cdn-icons-png.flaticon.com/512/1828/1828945.png" alt="Delete" />
                     </button>
                   </td>
                 </tr>

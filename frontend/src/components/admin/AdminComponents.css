@@ -83,6 +83,53 @@
   cursor: not-allowed;
 }
 
+/* Icon Button Styles */
+.btn-icon {
+  padding: 6px;
+  min-width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 3px;
+  background: transparent;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.btn-icon:hover {
+  transform: scale(1.1);
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+.btn-icon img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+.btn-edit.btn-icon:hover {
+  background: rgba(40, 167, 69, 0.1);
+  border-color: rgba(40, 167, 69, 0.2);
+}
+
+.btn-delete.btn-icon:hover {
+  background: rgba(220, 53, 69, 0.1);
+  border-color: rgba(220, 53, 69, 0.2);
+}
+
+.btn-variants.btn-icon {
+  background: transparent;
+  color: #17a2b8;
+}
+
+.btn-variants.btn-icon:hover {
+  background: rgba(23, 162, 184, 0.1);
+  border-color: rgba(23, 162, 184, 0.2);
+}
+
 /* Form Modal */
 .form-modal {
   position: fixed;
@@ -310,6 +357,43 @@ form {
 .data-table .actions {
   display: flex;
   gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Brand Table Specific Styles */
+.brand-logo {
+  text-align: center;
+  vertical-align: middle;
+  width: 60px;
+}
+
+.brand-name {
+  font-weight: 600;
+  color: #2c3e50;
+  vertical-align: middle;
+}
+
+.brand-description {
+  color: #6c757d;
+  max-width: 200px;
+  word-wrap: break-word;
+  vertical-align: middle;
+}
+
+.brand-website {
+  vertical-align: middle;
+  text-align: center;
+}
+
+.brand-website a {
+  color: #007bff;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.brand-website a:hover {
+  text-decoration: underline;
 }
 
 /* Status Badges */
