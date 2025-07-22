@@ -294,31 +294,116 @@ form {
   border: 1px solid #dee2e6;
 }
 
+/* Variants Section Styles */
+.variants-section {
+  margin-bottom: 20px;
+}
+
+.variants-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.variants-header h4 {
+  margin: 0;
+  color: #495057;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.variant-group {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 15px;
+  transition: all 0.3s ease;
+}
+
+.variant-group:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
 .variant-header {
   display: flex;
-  gap: 10px;
+  gap: 15px;
   align-items: center;
   margin-bottom: 15px;
 }
 
 .variant-header input {
   flex: 1;
+  background: white !important;
+  color: #212529 !important;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  transition: border-color 0.3s ease;
+}
+
+.variant-header input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
 .variant-values {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  margin-top: 10px;
 }
 
-.variant-value {
-  display: flex;
-  gap: 10px;
-  align-items: center;
+.variant-values label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #495057;
+  font-size: 0.9rem;
 }
 
-.variant-value input {
-  flex: 1;
+.variant-values textarea {
+  width: 100%;
+  background: white !important;
+  color: #212529 !important;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+  transition: border-color 0.3s ease;
+}
+
+.variant-values textarea:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.variant-values textarea::placeholder {
+  color: #6c757d;
+  font-style: italic;
+}
+
+.variant-remove-btn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.variant-remove-btn:hover {
+  background: #c82333;
+  transform: translateY(-1px);
 }
 
 /* Data Table */
@@ -361,6 +446,97 @@ form {
   align-items: center;
 }
 
+/* BrandManagement Table Specific Styles */
+.brand-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+  background: #fff;
+}
+
+.brand-table th, .brand-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+  word-break: break-word;
+  vertical-align: middle !important;
+  height: 56px;
+}
+
+.brand-table th {
+  background: #f6f6f6;
+  font-weight: 600;
+  vertical-align: middle !important;
+}
+
+.brand-table td.logo-cell {
+  /* display: flex removed to keep table border integrity */
+  height: auto;
+  padding: 10px 12px;
+}
+
+.brand-table td.logo-cell img {
+  max-height: 36px;
+  max-width: 80px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+}
+
+.brand-table td.actions {
+  /* display: flex removed to keep table border integrity */
+  min-width: 100px;
+  padding: 0;
+  height: auto;
+}
+
+.brand-table .btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+}
+
+.brand-table .btn-icon img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Remove any extra margin/padding from inner elements */
+.brand-table td *, .brand-table th * {
+  margin: 0;
+  padding: 0;
+  vertical-align: middle !important;
+}
+
+/* Utility flex centering for cell content */
+.cell-flex {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+}
+
+/* Created Date Column Styling for All Admin Tables */
+th.created-date,
+td.created-date {
+  min-width: 110px;
+  white-space: nowrap;
+  font-size: 15px;
+  color: #000 !important;
+  font-family: inherit;
+  text-align: left;
+  opacity: 1 !important;
+}
+
+
 /* Brand Table Specific Styles */
 .brand-logo {
   text-align: center;
@@ -387,7 +563,7 @@ form {
 }
 
 .brand-website a {
-  color: #007bff;
+  color: #000000;
   text-decoration: none;
   font-size: 0.9rem;
 }

@@ -198,7 +198,7 @@ const ProductManagement = () => {
   };
 
   const addVariant = () => {
-    setVariantsData(prev => [...prev, { name: '', values: [''] }]);
+    setVariantsData(prev => [...prev, { name: '', values: [] }]);
   };
 
   const removeVariant = (index) => {
@@ -206,36 +206,22 @@ const ProductManagement = () => {
   };
 
   const updateVariant = (index, field, value) => {
-    setVariantsData(prev => prev.map((variant, i) => 
-      i === index ? { ...variant, [field]: value } : variant
-    ));
+    if (field === 'values') {
+      // Convert comma-separated string to array, trim whitespace, and filter empty values
+      const valuesArray = value.split(',').map(v => v.trim()).filter(v => v !== '');
+      setVariantsData(prev => prev.map((variant, i) => 
+        i === index ? { ...variant, values: valuesArray } : variant
+      ));
+    } else {
+      setVariantsData(prev => prev.map((variant, i) => 
+        i === index ? { ...variant, [field]: value } : variant
+      ));
+    }
   };
 
-  const addVariantValue = (variantIndex) => {
-    setVariantsData(prev => prev.map((variant, i) => 
-      i === variantIndex 
-        ? { ...variant, values: [...variant.values, ''] }
-        : variant
-    ));
-  };
-
-  const removeVariantValue = (variantIndex, valueIndex) => {
-    setVariantsData(prev => prev.map((variant, i) => 
-      i === variantIndex 
-        ? { ...variant, values: variant.values.filter((_, vi) => vi !== valueIndex) }
-        : variant
-    ));
-  };
-
-  const updateVariantValue = (variantIndex, valueIndex, value) => {
-    setVariantsData(prev => prev.map((variant, i) => 
-      i === variantIndex 
-        ? { 
-            ...variant, 
-            values: variant.values.map((val, vi) => vi === valueIndex ? value : val)
-          }
-        : variant
-    ));
+  // Helper function to convert array to comma-separated string for display
+  const getVariantValuesString = (values) => {
+    return Array.isArray(values) ? values.join(', ') : '';
   };
 
   // Pagination logic
@@ -406,37 +392,23 @@ const ProductManagement = () => {
                       />
                       <button 
                         type="button" 
-                        className="btn btn-sm btn-delete"
+                        className="variant-remove-btn"
                         onClick={() => removeVariant(variantIndex)}
                       >
-                        Remove
+                        Remove Variant
                       </button>
                     </div>
                     <div className="variant-values">
-                      {variant.values.map((value, valueIndex) => (
-                        <div key={valueIndex} className="variant-value">
-                          <input
-                            type="text"
-                            placeholder="Value (e.g., Red, Large)"
-                            value={value}
-                            onChange={(e) => updateVariantValue(variantIndex, valueIndex, e.target.value)}
-                          />
-                          <button 
-                            type="button" 
-                            className="btn btn-sm btn-delete"
-                            onClick={() => removeVariantValue(variantIndex, valueIndex)}
-                          >
-                            ×
-                          </button>
-                        </div>
-                      ))}
-                      <button 
-                        type="button" 
-                        className="btn btn-sm btn-secondary"
-                        onClick={() => addVariantValue(variantIndex)}
-                      >
-                        + Add Value
-                      </button>
+                      <label htmlFor={`variant-values-${variantIndex}`}>
+                        Values :
+                      </label>
+                      <textarea
+                        id={`variant-values-${variantIndex}`}
+                        placeholder="Enter values separated by commas (e.g., Red, Blue, Green, Yellow)"
+                        value={getVariantValuesString(variant.values)}
+                        onChange={(e) => updateVariant(variantIndex, 'values', e.target.value)}
+                        rows="3"
+                      />
                     </div>
                   </div>
                 ))}

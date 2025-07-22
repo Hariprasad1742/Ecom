@@ -7,15 +7,7 @@ function App() {
   return (
     <Router>
       <div className="app-container">
-        <nav className="main-nav">
-          <div className="nav-brand">
-            <h2>E-Commerce Admin</h2>
-          </div>
-          <div className="nav-links">
-           
-            
-          </div>
-        </nav>
+        
 
         <main className="main-content">
           <Routes>
