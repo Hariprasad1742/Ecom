@@ -13,6 +13,8 @@ const CategoryManagement = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
 
   const API_BASE = 'http://localhost:3000/api';
 
@@ -91,6 +93,14 @@ const CategoryManagement = () => {
       [name]: type === 'checkbox' ? checked : value
     }));
   };
+
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentCategories = categories.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(categories.length / itemsPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
     <div className="management-container">
@@ -176,7 +186,7 @@ const CategoryManagement = () => {
               </tr>
             </thead>
             <tbody>
-              {categories.map(category => (
+              {currentCategories.map(category => (
                 <tr key={category._id}>
                   <td className="category-name">{category.name}</td>
                   <td className="category-description">
@@ -210,6 +220,44 @@ const CategoryManagement = () => {
         {!loading && categories.length === 0 && (
           <div className="empty-state">
             <p>No categories found. Create your first category!</p>
+          </div>
+        )}
+        
+        {/* Pagination */}
+        {categories.length > itemsPerPage && (
+          <div className="pagination">
+            <button 
+              className="btn btn-sm btn-secondary"
+              onClick={() => paginate(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
+            
+            <div className="pagination-info">
+              <span>Page {currentPage} of {totalPages}</span>
+              <span className="total-items">({categories.length} total items)</span>
+            </div>
+            
+            <div className="pagination-numbers">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(number => (
+                <button
+                  key={number}
+                  className={`btn btn-sm ${currentPage === number ? 'btn-primary' : 'btn-secondary'}`}
+                  onClick={() => paginate(number)}
+                >
+                  {number}
+                </button>
+              ))}
+            </div>
+            
+            <button 
+              className="btn btn-sm btn-secondary"
+              onClick={() => paginate(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
           </div>
         )}
       </div>

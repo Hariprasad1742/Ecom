@@ -6,6 +6,7 @@ const ProductManagement = () => {
   const [products, setProducts] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
   const [brands, setBrands] = useState([]);
+  const [filteredBrands, setFilteredBrands] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [showVariantsModal, setShowVariantsModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -21,6 +22,8 @@ const ProductManagement = () => {
   const [variantsData, setVariantsData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
 
   const API_BASE = 'http://localhost:3000/api';
 
@@ -61,6 +64,18 @@ const ProductManagement = () => {
     }
   };
 
+  const filterBrandsBySubCategory = (subCategoryId) => {
+    if (!subCategoryId) {
+      setFilteredBrands([]);
+      return;
+    }
+    const filtered = brands.filter(brand => 
+      brand.subCategory === subCategoryId || 
+      (brand.subCategory && brand.subCategory._id === subCategoryId)
+    );
+    setFilteredBrands(filtered);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -87,14 +102,17 @@ const ProductManagement = () => {
 
   const handleEdit = (product) => {
     setEditingProduct(product);
+    const subCategoryId = product.subCategory._id || product.subCategory;
     setFormData({
       name: product.name,
-      subCategory: product.subCategory._id || product.subCategory,
+      subCategory: subCategoryId,
       brand: product.brand?._id || product.brand || '',
       price: product.price.toString(),
       description: product.description || '',
       inStock: product.inStock
     });
+    // Filter brands based on the product's subcategory
+    filterBrandsBySubCategory(subCategoryId);
     setShowForm(true);
   };
 
@@ -146,6 +164,7 @@ const ProductManagement = () => {
       description: '', 
       inStock: true
     });
+    setFilteredBrands([]);
     setEditingProduct(null);
     setShowForm(false);
     setError('');
@@ -160,10 +179,22 @@ const ProductManagement = () => {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
+    const newValue = type === 'checkbox' ? checked : value;
+    
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: newValue
     }));
+    
+    // Filter brands when subcategory changes
+    if (name === 'subCategory') {
+      filterBrandsBySubCategory(newValue);
+      // Reset brand selection when subcategory changes
+      setFormData(prev => ({
+        ...prev,
+        brand: ''
+      }));
+    }
   };
 
   const addVariant = () => {
@@ -206,6 +237,14 @@ const ProductManagement = () => {
         : variant
     ));
   };
+
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentProducts = products.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(products.length / itemsPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
     <div className="management-container">
@@ -283,9 +322,17 @@ const ProductManagement = () => {
                     name="brand"
                     value={formData.brand}
                     onChange={handleInputChange}
+                    disabled={!formData.subCategory}
                   >
-                    <option value="">Select a brand</option>
-                    {brands.map(brand => (
+                    <option value="">
+                      {!formData.subCategory 
+                        ? "Select a subcategory first" 
+                        : filteredBrands.length === 0 
+                        ? "No brands available for this subcategory" 
+                        : "Select a brand"
+                      }
+                    </option>
+                    {filteredBrands.map(brand => (
                       <option key={brand._id} value={brand._id}>
                         {brand.name}
                       </option>
@@ -425,7 +472,7 @@ const ProductManagement = () => {
               </tr>
             </thead>
             <tbody>
-              {products.map(product => (
+              {currentProducts.map(product => (
                 <tr key={product._id}>
                   <td className="product-name">{product.name}</td>
                   <td className="subcategory-name">
@@ -470,6 +517,44 @@ const ProductManagement = () => {
         {!loading && products.length === 0 && (
           <div className="empty-state">
             <p>No products found. Create your first product!</p>
+          </div>
+        )}
+        
+        {/* Pagination */}
+        {products.length > itemsPerPage && (
+          <div className="pagination">
+            <button 
+              className="btn btn-sm btn-secondary"
+              onClick={() => paginate(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
+            
+            <div className="pagination-info">
+              <span>Page {currentPage} of {totalPages}</span>
+              <span className="total-items">({products.length} total items)</span>
+            </div>
+            
+            <div className="pagination-numbers">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(number => (
+                <button
+                  key={number}
+                  className={`btn btn-sm ${currentPage === number ? 'btn-primary' : 'btn-secondary'}`}
+                  onClick={() => paginate(number)}
+                >
+                  {number}
+                </button>
+              ))}
+            </div>
+            
+            <button 
+              className="btn btn-sm btn-secondary"
+              onClick={() => paginate(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
           </div>
         )}
       </div>

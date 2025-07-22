@@ -15,6 +15,8 @@ const SubCategoryManagement = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
 
   const API_BASE = 'http://localhost:3000/api';
 
@@ -104,6 +106,14 @@ const SubCategoryManagement = () => {
       [name]: type === 'checkbox' ? checked : value
     }));
   };
+
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentSubCategories = subCategories.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(subCategories.length / itemsPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
     <div className="management-container">
@@ -207,7 +217,7 @@ const SubCategoryManagement = () => {
               </tr>
             </thead>
             <tbody>
-              {subCategories.map(subCategory => (
+              {currentSubCategories.map(subCategory => (
                 <tr key={subCategory._id}>
                   <td className="subcategory-name">{subCategory.name}</td>
                   <td className="category-name">
@@ -244,6 +254,44 @@ const SubCategoryManagement = () => {
         {!loading && subCategories.length === 0 && (
           <div className="empty-state">
             <p>No subcategories found. Create your first subcategory!</p>
+          </div>
+        )}
+        
+        {/* Pagination */}
+        {subCategories.length > itemsPerPage && (
+          <div className="pagination">
+            <button 
+              className="btn btn-sm btn-secondary"
+              onClick={() => paginate(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
+            
+            <div className="pagination-info">
+              <span>Page {currentPage} of {totalPages}</span>
+              <span className="total-items">({subCategories.length} total items)</span>
+            </div>
+            
+            <div className="pagination-numbers">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(number => (
+                <button
+                  key={number}
+                  className={`btn btn-sm ${currentPage === number ? 'btn-primary' : 'btn-secondary'}`}
+                  onClick={() => paginate(number)}
+                >
+                  {number}
+                </button>
+              ))}
+            </div>
+            
+            <button 
+              className="btn btn-sm btn-secondary"
+              onClick={() => paginate(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
           </div>
         )}
       </div>

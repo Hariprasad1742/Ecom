@@ -4,10 +4,12 @@ import './AdminComponents.css';
 
 const BrandManagement = () => {
   const [brands, setBrands] = useState([]);
+  const [subCategories, setSubCategories] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingBrand, setEditingBrand] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
+    subCategory: '',
     description: '',
     website: '',
     logo: '',
@@ -15,11 +17,14 @@ const BrandManagement = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
 
   const API_BASE = 'http://localhost:3000/api';
 
   useEffect(() => {
     fetchBrands();
+    fetchSubCategories();
   }, []);
 
   const fetchBrands = async () => {
@@ -32,6 +37,15 @@ const BrandManagement = () => {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchSubCategories = async () => {
+    try {
+      const response = await axios.get(`${API_BASE}/subcategories`);
+      setSubCategories(response.data);
+    } catch (err) {
+      console.error('Failed to fetch subcategories:', err);
     }
   };
 
@@ -58,6 +72,7 @@ const BrandManagement = () => {
     setEditingBrand(brand);
     setFormData({
       name: brand.name,
+      subCategory: brand.subCategory?._id || brand.subCategory || '',
       description: brand.description || '',
       website: brand.website || '',
       logo: brand.logo || '',
@@ -82,7 +97,7 @@ const BrandManagement = () => {
   };
 
   const resetForm = () => {
-    setFormData({ name: '', description: '', website: '', logo: '', isActive: true });
+    setFormData({ name: '', subCategory: '', description: '', website: '', logo: '', isActive: true });
     setEditingBrand(null);
     setShowForm(false);
     setError('');
@@ -95,6 +110,14 @@ const BrandManagement = () => {
       [name]: type === 'checkbox' ? checked : value
     }));
   };
+
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentBrands = brands.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(brands.length / itemsPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
     <div className="management-container">
@@ -129,6 +152,23 @@ const BrandManagement = () => {
                   required
                   placeholder="Enter brand name"
                 />
+              </div>
+              <div className="form-group">
+                <label htmlFor="subCategory">Sub Category *</label>
+                <select
+                  id="subCategory"
+                  name="subCategory"
+                  value={formData.subCategory}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="">Select a sub category</option>
+                  {subCategories.map(subCat => (
+                    <option key={subCat._id} value={subCat._id}>
+                      {subCat.name}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="form-group">
                 <label htmlFor="description">Description</label>
@@ -206,7 +246,7 @@ const BrandManagement = () => {
               </tr>
             </thead>
             <tbody>
-              {brands.map(brand => (
+              {currentBrands.map(brand => (
                 <tr key={brand._id}>
                   <td className="brand-logo">
                     {brand.logo ? (
@@ -278,6 +318,44 @@ const BrandManagement = () => {
         {!loading && brands.length === 0 && (
           <div className="empty-state">
             <p>No brands found. Create your first brand!</p>
+          </div>
+        )}
+        
+        {/* Pagination */}
+        {brands.length > itemsPerPage && (
+          <div className="pagination">
+            <button 
+              className="btn btn-sm btn-secondary"
+              onClick={() => paginate(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
+            
+            <div className="pagination-info">
+              <span>Page {currentPage} of {totalPages}</span>
+              <span className="total-items">({brands.length} total items)</span>
+            </div>
+            
+            <div className="pagination-numbers">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(number => (
+                <button
+                  key={number}
+                  className={`btn btn-sm ${currentPage === number ? 'btn-primary' : 'btn-secondary'}`}
+                  onClick={() => paginate(number)}
+                >
+                  {number}
+                </button>
+              ))}
+            </div>
+            
+            <button 
+              className="btn btn-sm btn-secondary"
+              onClick={() => paginate(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
           </div>
         )}
       </div>
