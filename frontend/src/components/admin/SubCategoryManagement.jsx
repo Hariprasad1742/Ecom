@@ -78,13 +78,19 @@ const SubCategoryManagement = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this subcategory?')) {
+    const subCategory = subCategories.find(sc => sc._id === id);
+    const subCategoryName = subCategory ? subCategory.name : 'this subcategory';
+    
+    if (window.confirm(`⚠️ WARNING: Are you sure you want to permanently delete "${subCategoryName}"?\n\nThis action cannot be undone and will remove all associated brands and products.`)) {
       try {
         setLoading(true);
         await axios.delete(`${API_BASE}/subcategories/${id}`);
         await fetchSubCategories();
+        alert(`✅ SUCCESS: Subcategory "${subCategoryName}" has been deleted successfully.`);
       } catch (err) {
-        setError('Failed to delete subcategory');
+        const errorMsg = err.response?.data?.error || 'Failed to delete subcategory';
+        setError(errorMsg);
+        alert(`❌ ERROR: Failed to delete subcategory "${subCategoryName}".\n\nError: ${errorMsg}`);
         console.error(err);
       } finally {
         setLoading(false);

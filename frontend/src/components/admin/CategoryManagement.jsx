@@ -65,13 +65,19 @@ const CategoryManagement = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this category?')) {
+    const category = categories.find(c => c._id === id);
+    const categoryName = category ? category.name : 'this category';
+    
+    if (window.confirm(`⚠️ WARNING: Are you sure you want to permanently delete "${categoryName}"?\n\nThis action cannot be undone and will remove all associated subcategories and products.`)) {
       try {
         setLoading(true);
         await axios.delete(`${API_BASE}/categories/${id}`);
         await fetchCategories();
+        alert(`✅ SUCCESS: Category "${categoryName}" has been deleted successfully.`);
       } catch (err) {
-        setError('Failed to delete category');
+        const errorMsg = err.response?.data?.error || 'Failed to delete category';
+        setError(errorMsg);
+        alert(`❌ ERROR: Failed to delete category "${categoryName}".\n\nError: ${errorMsg}`);
         console.error(err);
       } finally {
         setLoading(false);

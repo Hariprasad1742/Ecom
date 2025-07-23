@@ -217,7 +217,16 @@ const ProductManagement = () => {
   };
 
   const removeVariant = (index) => {
-    setVariantsData(prev => prev.filter((_, i) => i !== index));
+    const variantName = variantsData[index]?.name || 'this variant';
+    if (window.confirm(`⚠️ WARNING: Are you sure you want to delete the variant "${variantName}"?\n\nThis will remove all its values and cannot be undone.`)) {
+      try {
+        setVariantsData(prev => prev.filter((_, i) => i !== index));
+        alert(`✅ Variant "${variantName}" has been removed successfully.`);
+      } catch (error) {
+        console.error('Error removing variant:', error);
+        alert(`❌ Failed to remove variant "${variantName}". Please try again.`);
+      }
+    }
   };
 
   const updateVariant = (index, field, value) => {
@@ -267,16 +276,25 @@ const ProductManagement = () => {
   };
 
   const removeVariantValue = (variantIndex, valueToRemove) => {
-    setVariantsData(prev => {
-      const newVariants = [...prev];
-      newVariants[variantIndex] = {
-        ...newVariants[variantIndex],
-        values: newVariants[variantIndex].values.filter(v => 
-          (typeof v === 'string' ? v : v.value) !== valueToRemove
-        )
-      };
-      return newVariants;
-    });
+    const variantName = variantsData[variantIndex]?.name || 'this variant';
+    if (window.confirm(`⚠️ Are you sure you want to remove the value "${valueToRemove}" from variant "${variantName}"?\n\nThis action cannot be undone.`)) {
+      try {
+        setVariantsData(prev => {
+          const newVariants = [...prev];
+          newVariants[variantIndex] = {
+            ...newVariants[variantIndex],
+            values: newVariants[variantIndex].values.filter(v => 
+              (typeof v === 'string' ? v : v.value) !== valueToRemove
+            )
+          };
+          return newVariants;
+        });
+        alert(`✅ Value "${valueToRemove}" has been removed from variant "${variantName}" successfully.`);
+      } catch (error) {
+        console.error('Error removing variant value:', error);
+        alert(`❌ Failed to remove value "${valueToRemove}" from variant "${variantName}". Please try again.`);
+      }
+    }
   };
 
   const handleKeyDown = (e, variantIndex) => {

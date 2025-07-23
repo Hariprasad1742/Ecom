@@ -83,13 +83,19 @@ const BrandManagement = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this brand?')) {
+    const brand = brands.find(b => b._id === id);
+    const brandName = brand ? brand.name : 'this brand';
+    
+    if (window.confirm(`⚠️ WARNING: Are you sure you want to permanently delete "${brandName}"?\n\nThis action cannot be undone and will remove all associated data.`)) {
       try {
         setLoading(true);
         await axios.delete(`${API_BASE}/brands/${id}`);
         await fetchBrands();
+        alert(`✅ SUCCESS: Brand "${brandName}" has been deleted successfully.`);
       } catch (err) {
-        setError('Failed to delete brand');
+        const errorMsg = err.response?.data?.error || 'Failed to delete brand';
+        setError(errorMsg);
+        alert(`❌ ERROR: Failed to delete brand "${brandName}".\n\nError: ${errorMsg}`);
         console.error(err);
       } finally {
         setLoading(false);
