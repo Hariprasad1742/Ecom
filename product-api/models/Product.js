@@ -1,8 +1,13 @@
 const mongoose = require('mongoose');
 
+const VariantValueSchema = new mongoose.Schema({
+  value: { type: String, required: true },
+  available: { type: Boolean, default: true }
+});
+
 const VariantSchema = new mongoose.Schema({
-  name: String,
-  values: [String]   
+  name: { type: String, required: true },
+  values: [VariantValueSchema]
 });
 
 const ProductSchema = new mongoose.Schema({

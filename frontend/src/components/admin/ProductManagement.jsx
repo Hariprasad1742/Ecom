@@ -120,7 +120,20 @@ const ProductManagement = () => {
 
   const handleEditVariants = (product) => {
     setEditingVariantsProduct(product);
-    setVariantsData(product.variants || []);
+    
+    // Transform variants to ensure proper format
+    const transformedVariants = (product.variants || []).map(variant => ({
+      ...variant,
+      values: (variant.values || []).map(value => {
+        // Handle both old format (string) and new format (object)
+        if (typeof value === 'string') {
+          return { value: value, available: true };
+        }
+        return value; // Already in new format
+      })
+    }));
+    
+    setVariantsData(transformedVariants);
     setShowVariantsModal(true);
   };
 
@@ -233,9 +246,13 @@ const ProductManagement = () => {
       const newVariants = [...prev];
       const values = [...(newVariants[variantIndex].values || [])];
       
-      // Add the new value if it doesn't already exist
-      if (!values.includes(newValueInput.trim())) {
-        values.push(newValueInput.trim());
+      // Check if value already exists (compare the value property)
+      const valueExists = values.some(v => 
+        (typeof v === 'string' ? v : v.value) === newValueInput.trim()
+      );
+      
+      if (!valueExists) {
+        values.push({ value: newValueInput.trim(), available: true });
         newVariants[variantIndex] = {
           ...newVariants[variantIndex],
           values
@@ -254,7 +271,9 @@ const ProductManagement = () => {
       const newVariants = [...prev];
       newVariants[variantIndex] = {
         ...newVariants[variantIndex],
-        values: newVariants[variantIndex].values.filter(v => v !== valueToRemove)
+        values: newVariants[variantIndex].values.filter(v => 
+          (typeof v === 'string' ? v : v.value) !== valueToRemove
+        )
       };
       return newVariants;
     });
@@ -267,6 +286,45 @@ const ProductManagement = () => {
     } else if (e.key === 'Escape') {
       setAddingValueFor(null);
       setNewValueInput('');
+    }
+  };
+
+  const toggleVariantValueAvailability = async (variantIndex, valueIndex) => {
+    try {
+      const currentValue = variantsData[variantIndex].values[valueIndex];
+      const newAvailability = !currentValue.available;
+      
+      // Update local state immediately for better UX
+      setVariantsData(prev => {
+        const newVariants = [...prev];
+        newVariants[variantIndex].values[valueIndex] = {
+          ...currentValue,
+          available: newAvailability
+        };
+        return newVariants;
+      });
+      
+      // Update backend
+      await axios.patch(
+        `${API_BASE}/products/${editingVariantsProduct._id}/variants/${variantIndex}/values/${valueIndex}/availability`,
+        { available: newAvailability }
+      );
+      
+      // Refresh products list to ensure consistency
+      await fetchProducts();
+    } catch (err) {
+      console.error('Failed to update variant availability:', err);
+      setError('Failed to update variant availability');
+      
+      // Revert local state on error
+      setVariantsData(prev => {
+        const newVariants = [...prev];
+        newVariants[variantIndex].values[valueIndex] = {
+          ...newVariants[variantIndex].values[valueIndex],
+          available: !newVariants[variantIndex].values[valueIndex].available
+        };
+        return newVariants;
+      });
     }
   };
 
@@ -445,19 +503,33 @@ const ProductManagement = () => {
                       </button>
                     </div>
                     <div className="variant-values">
-                      {variant.values && variant.values.map((value, valueIndex) => (
-                        <span key={valueIndex} className="variant-tag">
-                          {value}
-                          <button 
-                            type="button" 
-                            className="variant-tag-remove"
-                            onClick={() => removeVariantValue(variantIndex, value)}
-                            title="Remove value"
+                      {variant.values && variant.values.map((value, valueIndex) => {
+                        const valueText = typeof value === 'string' ? value : value.value;
+                        const isAvailable = typeof value === 'string' ? true : value.available;
+                        
+                        return (
+                          <span 
+                            key={valueIndex} 
+                            className={`variant-tag ${isAvailable ? 'available' : 'unavailable'}`}
+                            onClick={() => toggleVariantValueAvailability(variantIndex, valueIndex)}
+                            title={`Click to toggle availability. Currently: ${isAvailable ? 'Available' : 'Unavailable'}`}
+                            style={{ cursor: 'pointer' }}
                           >
-                            ×
-                          </button>
-                        </span>
-                      ))}
+                            {valueText}
+                            <button 
+                              type="button" 
+                              className="variant-tag-remove"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removeVariantValue(variantIndex, valueText);
+                              }}
+                              title="Remove value"
+                            >
+                              ×
+                            </button>
+                          </span>
+                        );
+                      })}
                       
                       {addingValueFor === variantIndex ? (
                         <div className="add-value-input">

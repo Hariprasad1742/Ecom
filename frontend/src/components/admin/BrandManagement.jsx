@@ -53,6 +53,7 @@ const BrandManagement = () => {
     e.preventDefault();
     try {
       setLoading(true);
+      console.log('Submitting brand:', formData);
       if (editingBrand) {
         await axios.put(`${API_BASE}/brands/${editingBrand._id}`, formData);
       } else {
@@ -61,8 +62,8 @@ const BrandManagement = () => {
       await fetchBrands();
       resetForm();
     } catch (err) {
-      setError('Failed to save brand');
-      console.error(err);
+      setError(err.response?.data?.error || 'Failed to save brand');
+      console.error('Brand save error:', err);
     } finally {
       setLoading(false);
     }
@@ -131,7 +132,7 @@ const BrandManagement = () => {
         </button>
       </div>
 
-      {error && <div className="error-message">{error}</div>}
+      {error && !showForm && <div className="error-message">{error}</div>}
 
       {showForm && (
         <div className="form-modal">
@@ -140,6 +141,7 @@ const BrandManagement = () => {
               <h3>{editingBrand ? 'Edit Brand' : 'Add New Brand'}</h3>
               <button className="close-btn" onClick={resetForm}>×</button>
             </div>
+            {error && <div className="error-message" style={{marginBottom: '10px'}}>{error}</div>}
             <form onSubmit={handleSubmit}>
               <div className="form-group">
                 <label htmlFor="name">Brand Name *</label>
